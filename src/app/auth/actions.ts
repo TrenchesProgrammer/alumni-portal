@@ -27,6 +27,8 @@ export async function signup(formData: FormData) {
 
   const role = formData.get('role') as string || 'student'
   const fullName = formData.get('full_name') as string || ''
+  const matricNumber = formData.get('matric_number') as string || ''
+  const graduationYear = formData.get('graduation_year') ? parseInt(formData.get('graduation_year') as string) : null
   
   console.log("Signup attempt with Role:", role, "Name:", fullName)
 
@@ -37,6 +39,8 @@ export async function signup(formData: FormData) {
       data: {
         full_name: fullName,
         role: role,
+        matric_number: matricNumber,
+        graduation_year: graduationYear
       }
     }
   }

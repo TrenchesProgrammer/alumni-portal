@@ -15,6 +15,8 @@ create table public.profiles (
   bio text,
   github_url text,
   linkedin_url text,
+  matric_number text,
+  graduation_year integer,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -97,16 +99,18 @@ create policy "Alumni can update requests sent to them" on public.mentorship_req
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, full_name, avatar_url, role)
+  insert into public.profiles (id, full_name, avatar_url, role, matric_number, graduation_year)
   values (
     new.id, 
     new.raw_user_meta_data->>'full_name', 
     new.raw_user_meta_data->>'avatar_url',
-    COALESCE((new.raw_user_meta_data->>'role')::user_role, 'student'::user_role)
+    COALESCE((new.raw_user_meta_data->>'role')::public.user_role, 'student'::public.user_role),
+    new.raw_user_meta_data->>'matric_number',
+    NULLIF(new.raw_user_meta_data->>'graduation_year', '')::integer
   );
   return new;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 create trigger on_auth_user_created
   after insert on auth.users
