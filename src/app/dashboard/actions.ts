@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { createAdminClient } from '@/utils/supabase/admin'
 
 export async function approveUser(userId: string, status: 'approved' | 'rejected') {
   const supabase = await createClient()
@@ -18,8 +19,9 @@ export async function approveUser(userId: string, status: 'approved' | 'rejected
 
   if (currentUserProfile?.role !== 'admin') throw new Error("Unauthorized")
 
-  // Update target user status
-  const { error } = await supabase
+  // Use Admin Client to bypass RLS when updating other users
+  const adminClient = createAdminClient()
+  const { error } = await adminClient
     .from('profiles')
     .update({ status })
     .eq('id', userId)
