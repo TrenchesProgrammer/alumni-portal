@@ -7,13 +7,35 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
-import { CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react'
+import { CheckCircle2, ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react'
 
 export default function OnboardingWizard({ userProfile, allTechStacks, userTechIds }: any) {
   const [step, setStep] = useState(1)
+  const [selectedTechs, setSelectedTechs] = useState<string[]>(userTechIds || [])
+  const [error, setError] = useState('')
 
-  const nextStep = () => setStep(s => Math.min(s + 1, 3))
-  const prevStep = () => setStep(s => Math.max(s - 1, 1))
+  const handleTechChange = (techId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTechs(prev => [...prev, techId])
+      setError('')
+    } else {
+      setSelectedTechs(prev => prev.filter(id => id !== techId))
+    }
+  }
+
+  const nextStep = () => {
+    if (step === 2 && selectedTechs.length === 0) {
+      setError('Please select at least one tech stack to continue.')
+      return
+    }
+    setError('')
+    setStep(s => Math.min(s + 1, 3))
+  }
+  
+  const prevStep = () => {
+    setError('')
+    setStep(s => Math.max(s - 1, 1))
+  }
 
   return (
     <form action={updateProfile} className="space-y-6">
@@ -61,8 +83,16 @@ export default function OnboardingWizard({ userProfile, allTechStacks, userTechI
       {/* STEP 2: Tech Stacks */}
       <div className={step === 2 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden'}>
         <div className="space-y-3">
-          <Label>Select your Tech Stacks & Interests</Label>
+          <Label>Select your Tech Stacks & Interests <span className="text-destructive">*</span></Label>
           <p className="text-sm text-muted-foreground mb-4">This helps our smart matching algorithm connect you with the right mentors or mentees.</p>
+          
+          {error && (
+            <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md mb-4">
+              <AlertCircle className="w-4 h-4" />
+              {error}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 border rounded-md bg-muted/20 max-h-[300px] overflow-y-auto">
             {allTechStacks.map((tech: any) => (
               <div key={tech.id} className="flex items-center space-x-2">
@@ -70,7 +100,8 @@ export default function OnboardingWizard({ userProfile, allTechStacks, userTechI
                   id={`tech-${tech.id}`} 
                   name="tech_ids" 
                   value={tech.id} 
-                  defaultChecked={userTechIds.includes(tech.id)} 
+                  checked={selectedTechs.includes(tech.id)} 
+                  onCheckedChange={(checked) => handleTechChange(tech.id, checked === true)}
                 />
                 <label 
                   htmlFor={`tech-${tech.id}`}
