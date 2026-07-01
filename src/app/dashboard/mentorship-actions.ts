@@ -10,6 +10,20 @@ export async function requestMentorship(alumniId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Not authenticated")
 
+  // Prevent duplicates by checking if a request already exists
+  const { data: existingRequest } = await supabase
+    .from('mentorship_requests')
+    .select('id')
+    .eq('student_id', user.id)
+    .eq('alumni_id', alumniId)
+    .maybeSingle()
+
+  if (existingRequest) {
+    // Already requested, ignore the duplicate click
+    revalidatePath('/dashboard')
+    return
+  }
+
   const { error } = await supabase
     .from('mentorship_requests')
     .insert({

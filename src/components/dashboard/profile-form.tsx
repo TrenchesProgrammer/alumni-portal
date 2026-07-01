@@ -35,22 +35,25 @@ export default function ProfileForm({ userProfile, allTechStacks, userTechIds }:
             <div className="space-y-3 pt-2">
               <Label>Tech Stacks & Interests</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4 border rounded-md bg-muted/20">
-                {allTechStacks.map((tech: any) => (
-                  <div key={tech.id} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`tech-${tech.id}`} 
-                      name="tech_ids" 
-                      value={tech.id} 
-                      defaultChecked={userTechIds.includes(tech.id)} 
-                    />
-                    <label 
-                      htmlFor={`tech-${tech.id}`}
-                      className="text-sm font-medium leading-none cursor-pointer"
-                    >
-                      {tech.name}
-                    </label>
-                  </div>
-                ))}
+                {allTechStacks.map((tech: any) => {
+                  const isChecked = userTechIds.includes(tech.id);
+                  return (
+                    <div key={`${tech.id}-${isChecked}`} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`tech-${tech.id}`} 
+                        name="tech_ids" 
+                        value={tech.id} 
+                        defaultChecked={isChecked} 
+                      />
+                      <label 
+                        htmlFor={`tech-${tech.id}`}
+                        className="text-sm font-medium leading-none cursor-pointer"
+                      >
+                        {tech.name}
+                      </label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

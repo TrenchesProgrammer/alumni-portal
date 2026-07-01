@@ -46,7 +46,8 @@ create table public.mentorship_requests (
   alumni_id uuid references public.profiles(id) on delete cascade not null,
   status request_status default 'pending'::request_status not null,
   message text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(student_id, alumni_id)
 );
 
 -- Jobs Table
